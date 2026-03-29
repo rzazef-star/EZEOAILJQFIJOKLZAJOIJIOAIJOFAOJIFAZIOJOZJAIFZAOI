@@ -9,31 +9,31 @@ const client = new Client({
   ]
 });
 
-client.once("clientReady", (client) => {
-  console.log(`Connecté : ${client.user.tag}`);
+const allowed = ["659993389365723157", "1472230708087885970"];
+
+client.once("clientReady", () => {
+  console.log("Bot connecté");
 });
 
 client.on("messageCreate", async (message) => {
   if (!message.content.startsWith("+dm") || message.author.bot) return;
 
+  if (!allowed.includes(message.author.id)) return;
+
   const args = message.content.slice(3).trim();
-  if (!args) return message.reply("met un msg P4 DE MERDE.");
+  if (!args) return message.reply("Met Un Msg Trdc.");
 
   const guild = message.guild;
   await guild.members.fetch();
 
   for (const member of guild.members.cache.values()) {
     if (!member.user.bot) {
-      const msg = `${member}
-
-${args}`;
-
-      await member.send(msg).catch(() => {});
-      await new Promise(r => setTimeout(r, 800)); 
+      await member.send(`${member}\n\n${args}`).catch(() => {});
+      await new Promise(r => setTimeout(r, 800));
     }
   }
 
-  message.reply("DM LOAD ALL !");
+  message.reply("DM load !");
 });
 
 client.login(process.env.TOKEN);
