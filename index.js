@@ -1,3 +1,20 @@
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.DirectMessages
+  ],
+  partials: [Partials.Channel]
+});
+
+client.once("ready", () => {
+  console.log(`Connecté en tant que ${client.user.tag}`);
+});
+
 client.on("messageCreate", async (message) => {
   if (!message.content.startsWith("+dm")) return;
   if (!message.guild) return;
@@ -11,7 +28,6 @@ client.on("messageCreate", async (message) => {
     .filter(m => !m.user.bot && m.id !== message.author.id);
 
   let dmCount = 0;
-  let progress = 0;
   const totalMembers = members.size;
   const totalBlocks = 20;
 
@@ -28,7 +44,7 @@ client.on("messageCreate", async (message) => {
       dmCount++;
     } catch (e) {}
 
-    progress = Math.floor((dmCount / totalMembers) * 100);
+    const progress = Math.floor((dmCount / totalMembers) * 100);
     const filled = Math.round((progress / 100) * totalBlocks);
     const bar = "█".repeat(filled) + "░".repeat(totalBlocks - filled);
 
@@ -41,7 +57,8 @@ client.on("messageCreate", async (message) => {
 
     await msg.edit({ embeds: [embed] });
 
-    await new Promise(r => setTimeout(r, 800)); 
+    await new Promise(r => setTimeout(r, 800));
   }
 });
+
 client.login(process.env.TOKEN);
