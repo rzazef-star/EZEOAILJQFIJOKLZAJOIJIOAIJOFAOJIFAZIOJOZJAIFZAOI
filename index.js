@@ -1,39 +1,47 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
-});
-
-const allowed = ["659993389365723157", "1472230708087885970"];
-
-client.once("clientReady", () => {
-  console.log("Bot connecté");
-});
-
 client.on("messageCreate", async (message) => {
-  if (!message.content.startsWith("+dm") || message.author.bot) return;
-
-  if (!allowed.includes(message.author.id)) return;
+  if (!message.content.startsWith("+dm")) return;
+  if (!message.guild) return;
 
   const args = message.content.slice(3).trim();
-  if (!args) return message.reply("Met Un Msg Trdc.");
+  if (!args) return message.reply("Met un message.");
 
-  const guild = message.guild;
-  await guild.members.fetch();
+  await message.guild.members.fetch();
 
-  for (const member of guild.members.cache.values()) {
-    if (!member.user.bot) {
-      await member.send(`${member}\n\n${args}`).catch(() => {});
-      await new Promise(r => setTimeout(r, 800));
-    }
+  const members = message.guild.members.cache
+    .filter(m => !m.user.bot && m.id !== message.author.id);
+
+  let dmCount = 0;
+  let progress = 0;
+  const totalMembers = members.size;
+  const totalBlocks = 20;
+
+  const embed = {
+    description: "Chargement...",
+    color: 0xFFFFFF
+  };
+
+  const msg = await message.channel.send({ embeds: [embed] });
+
+  for (const member of members.values()) {
+    try {
+      await member.send(args);
+      dmCount++;
+    } catch (e) {}
+
+    progress = Math.floor((dmCount / totalMembers) * 100);
+    const filled = Math.round((progress / 100) * totalBlocks);
+    const bar = "█".repeat(filled) + "░".repeat(totalBlocks - filled);
+
+    embed.description =
+      `**Message : ${args}**\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Progression : ${bar}\n` +
+      `Pourcentage : ${progress}%\n\n` +
+      `DM : ${dmCount}`;
+
+    await msg.edit({ embeds: [embed] });
+
+    await new Promise(r => setTimeout(r, 800)); 
   }
-
-  message.reply("DM load !");
 });
-
 client.login(process.env.TOKEN);
