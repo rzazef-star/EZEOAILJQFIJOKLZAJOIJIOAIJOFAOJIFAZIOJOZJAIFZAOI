@@ -20,29 +20,22 @@ client.on("messageCreate", async (message) => {
   if (!message.guild) return;
 
   const args = message.content.slice(3).trim();
-  if (!args) return message.reply("Met un message P4  DE MERDE.");
+  if (!args) return message.reply("Met un message p4 de merde.");
 
   await message.guild.members.fetch();
 
-  // autorise à te DM même si tu es seul
   const members = message.guild.members.cache
     .filter(m => !m.user.bot);
-
-  if (members.size === 0) {
-    return message.reply("0 membre a dm.");
-  }
 
   let dmCount = 0;
   const totalMembers = members.size;
   const totalBlocks = 20;
 
-  const bar = "░".repeat(totalBlocks);
-
   const embed = {
     description:
       `**Message : ${args}**\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Progression : ${bar}\n` +
+      `Progression : ${"░".repeat(totalBlocks)}\n` +
       `Pourcentage : 0%\n\n` +
       `DM : 0`,
     color: 0xFFFFFF
@@ -52,7 +45,7 @@ client.on("messageCreate", async (message) => {
 
   for (const member of members.values()) {
     try {
-      await member.send(args);
+      await member.send(`${args}\n\n<@${member.id}>`);
       dmCount++;
     } catch (e) {}
 
@@ -69,7 +62,7 @@ client.on("messageCreate", async (message) => {
 
     await msg.edit({ embeds: [embed] });
 
-    await new Promise(r => setTimeout(r, 800)); // anti rate limit
+    await new Promise(r => setTimeout(r, 500));
   }
 });
 
